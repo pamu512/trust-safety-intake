@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import csv
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 from openpyxl import load_workbook
@@ -39,6 +39,8 @@ def _infer_type(header: str, values: list[str]) -> str:
     if nonempty and all(_parse_date(v) for v in nonempty):
         return "date"
     if nonempty and all(_parse_number(v) is not None for v in nonempty):
+        return "number"
+    if nonempty and any(_looks_numeric(header, v) for v in nonempty):
         return "number"
     if 0 < len(set(nonempty)) <= 12:
         return "category"
@@ -155,21 +157,32 @@ def _read_csv(path: Path) -> list[tuple[str, list[str], list[list[str]]]]:
         return [(path.stem, headers, rows)]
 
 
+def _cell_str(c) -> str:
+    if c is None:
+        return ""
+    if isinstance(c, date):
+        return c.strftime("%Y-%m-%d")
+    return str(c)
+
+
 def _read_xlsx(path: Path) -> list[tuple[str, list[str], list[list[str]]]]:
     wb = load_workbook(path, data_only=True, read_only=True)
-    out = []
-    for ws in wb.worksheets:
-        rows_iter = ws.iter_rows(values_only=True)
-        first = next(rows_iter, None)
-        if not first:
-            out.append((ws.title, [], []))
-            continue
-        headers = [str(c) if c is not None else "" for c in first]
-        rows = []
-        for row in rows_iter:
-            rows.append(["" if c is None else str(c) for c in row])
-        out.append((ws.title, headers, rows))
-    return out
+    try:
+        out = []
+        for ws in wb.worksheets:
+            rows_iter = ws.iter_rows(values_only=True)
+            first = next(rows_iter, None)
+            if not first:
+                out.append((ws.title, [], []))
+                continue
+            headers = [_cell_str(c) for c in first]
+            rows = []
+            for row in rows_iter:
+                rows.append([_cell_str(c) for c in row])
+            out.append((ws.title, headers, rows))
+        return out
+    finally:
+        wb.close()
 
 
 def parse_table(path: Path) -> dict:
