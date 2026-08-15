@@ -11,6 +11,9 @@
 {{#each ledger}}
 | {{name}} = {{value}} {{unit}} | {{source}} | {{validate_flag}} |
 {{/each}}
+{{#each unknown}}
+| {{value}} = UNKNOWN — author must supply | UNKNOWN | Validate |
+{{/each}}
 
 ## Options
 {{#each options}}

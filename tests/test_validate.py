@@ -86,6 +86,59 @@ def test_duplicate_new_short_override_exits_1(tmp_path: Path, complete_answers):
     assert any(f["code"] == "duplicate_new" for f in result["failures"])
 
 
+def test_new_doc_without_match_fails_on_live_overlap(tmp_path: Path, complete_answers):
+    complete_answers["title"] = "Repeat claimant static control"
+    dest = init_run("Repeat claimant static control", runs_dir=tmp_path)
+    run_id = dest.name
+    facts = {"derived": []}
+    estimates = {"estimates": []}
+    write_json(run_id, "answers.json", complete_answers, tmp_path)
+    write_json(run_id, "facts.json", facts, tmp_path)
+    write_json(run_id, "estimates.json", estimates, tmp_path)
+    render_memo(
+        complete_answers,
+        facts,
+        {"overlaps": []},
+        estimates,
+        build_ledger(facts, complete_answers, estimates),
+        TEMPLATES,
+        run_id=run_id,
+        runs_dir=tmp_path,
+    )
+    assert not (dest / "overlaps.json").exists()
+    inventory = {
+        "brands": ["foodora", "foodpanda", "yemeksepeti"],
+        "journeys": ["account", "promo", "checkout", "claims-cancel", "payout", "cross-journey"],
+        "stack": [{"id": "rules", "name": "Rules engine", "layer": "decisioning", "notes": ""}],
+        "controls": [
+            {
+                "id": "ctl-refund-static",
+                "name": "Repeat claimant rule",
+                "type": "rule",
+                "journey": "claims-cancel",
+                "brands": ["foodpanda"],
+                "status": "live",
+                "owner": "ops",
+                "related_docs": ["doc-ex-1"],
+            }
+        ],
+        "docs": [
+            {
+                "id": "doc-ex-1",
+                "type": "brd",
+                "title": "Repeat claimant static rule",
+                "status": "shipped",
+                "journey": "claims-cancel",
+                "brands": ["foodpanda"],
+                "link": "",
+            }
+        ],
+    }
+    code, result = validate_run(run_id, tmp_path, inventory)
+    assert code == 1
+    assert any(f["code"] == "duplicate_new" for f in result["failures"])
+
+
 def test_memo_only_no_draft_exits_0(tmp_path: Path, complete_answers):
     run_id = _write_memo_run(tmp_path, complete_answers)
     code, result = validate_run(run_id, tmp_path, CLEAN_INVENTORY)

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from trust_intake.answers import NEEDED_SLOTS
 from trust_intake.ledger import build_ledger
 
@@ -13,8 +15,9 @@ RANGES = {
 COLUMN_TO_SLOT = (
     (("loss", "euro", "eur"), "euro_impact"),
     (("volume", "claim"), "volume"),
-    (("rate", "pct", "fp"), "rate"),
+    (("rate", "pct", "fp", "fp_rate", "false_positive"), "rate"),
 )
+_TOKEN_RE = re.compile(r"[^a-z0-9]+")
 
 
 def _ledger_map(answers: dict, facts: dict) -> dict[str, dict]:
@@ -39,10 +42,23 @@ def _estimate(name: str, value: float, unit: str | None, method: str, inputs: li
     }
 
 
+def _has_alias(col: str, keys: tuple[str, ...]) -> bool:
+    low = col.lower()
+    tokens = {t for t in _TOKEN_RE.split(low) if t}
+    padded = f"_{low}_"
+    for key in keys:
+        if low == key or key in tokens or f"_{key}_" in padded:
+            return True
+    return False
+
+
 def _slot_from_column(col: str) -> str | None:
     low = col.lower()
     for keys, slot in COLUMN_TO_SLOT:
-        if any(k in low for k in keys):
+        if slot == "rate":
+            if _has_alias(low, keys):
+                return slot
+        elif any(k in low for k in keys):
             return slot
     return None
 
@@ -87,9 +103,10 @@ def extrapolate(answers: dict, facts: dict) -> dict:
             for name, row in ledger.items():
                 if name == f"{slot}_{brand}":
                     continue
-                if not name.startswith(f"{slot}_"):
+                prefix = f"{slot}_"
+                if not name.startswith(prefix):
                     continue
-                peer = name.split("_", 1)[1]
+                peer = name[len(prefix) :]
                 gmv_a = ledger.get(f"gmv_{brand}")
                 gmv_p = ledger.get(f"gmv_{peer}")
                 if gmv_a and gmv_p and float(gmv_p["value"]):

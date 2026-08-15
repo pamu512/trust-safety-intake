@@ -104,6 +104,24 @@ def test_write_approved_then_render_to_run(tmp_path: Path, complete_answers):
     assert "10000" in text
 
 
+def test_render_memo_lists_unknown(complete_answers):
+    facts = {"derived": []}
+    overlaps = {"overlaps": []}
+    estimates = {"estimates": [], "unknown": ["euro_impact", "rate"]}
+    ledger = build_ledger(facts, complete_answers, estimates)
+    text = render_memo(complete_answers, facts, overlaps, estimates, ledger, TEMPLATES)
+    assert "UNKNOWN — author must supply" in text
+    assert "euro_impact" in text
+    assert "rate" in text
+
+
+def test_render_doc_missing_ledger_slot_raises(complete_answers):
+    facts, overlaps, estimates, ledger = _bundle(complete_answers)
+    ledger = [row for row in ledger if row["name"] != "volume"]
+    with pytest.raises(ValueError, match="volume"):
+        render_doc("brd", complete_answers, facts, overlaps, estimates, ledger, TEMPLATES)
+
+
 def test_render_memo_writes_without_approved(tmp_path: Path, complete_answers):
     dest = init_run("Holdout for refunds", runs_dir=tmp_path)
     facts, overlaps, estimates, ledger = _bundle(complete_answers)

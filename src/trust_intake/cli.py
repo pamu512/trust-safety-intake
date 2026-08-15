@@ -166,10 +166,14 @@ def _cmd_validate(args: argparse.Namespace) -> int:
 
 
 def _cmd_run(args: argparse.Namespace) -> int:
+    runs_dir = Path(args.runs_dir)
     if args.file:
         code = _cmd_parse(args)
         if code:
             return code
+    else:
+        if not (runs_dir / args.run / "facts.json").is_file():
+            write_json(args.run, "facts.json", {"tables": [], "derived": []}, runs_dir)
     for step in (_cmd_match, _cmd_extrapolate, _cmd_memo):
         code = step(args)
         if code:

@@ -113,7 +113,9 @@ def validate_answers(answers: dict) -> list[dict]:
     if answers["doc_type"] not in DOC_TYPES:
         fails.append(_fail("bad_enum", "doc_type", "invalid doc_type"))
     success = answers["success"]
-    if not success.get("metric") or success.get("direction") not in DIRECTIONS:
+    if not isinstance(success, dict):
+        fails.append(_fail("bad_type", "success", "success must be an object"))
+    elif not success.get("metric") or success.get("direction") not in DIRECTIONS:
         fails.append(_fail("bad_success", "success", "metric and direction required"))
     if not answers["approvers"]:
         fails.append(_fail("missing_approvers", "approvers", "at least one approver"))
@@ -123,15 +125,26 @@ def validate_answers(answers: dict) -> list[dict]:
         val = _get(answers, path)
         if not isinstance(val, str) or len(val.strip()) < PROSE_MIN:
             fails.append(_fail("short_prose", path, f"{path} must be >= {PROSE_MIN} chars"))
-    for opt in answers["options"]:
-        if len(str(opt.get("summary") or "")) < PROSE_MIN:
-            fails.append(_fail("short_prose", f"options.{opt.get('id')}.summary", "option summary too short"))
-    if not any(o.get("is_do_nothing") for o in answers["options"]):
-        fails.append(_fail("missing_do_nothing", "options", "one option must be do-nothing"))
-    ids = {o.get("id") for o in answers["options"]}
+    options = answers["options"]
+    if not isinstance(options, list):
+        fails.append(_fail("bad_type", "options", "options must be a list"))
+        ids = set()
+    else:
+        for opt in options:
+            if not isinstance(opt, dict):
+                fails.append(_fail("bad_type", "options", "each option must be an object"))
+                continue
+            if len(str(opt.get("summary") or "")) < PROSE_MIN:
+                fails.append(_fail("short_prose", f"options.{opt.get('id')}.summary", "option summary too short"))
+        if not any(isinstance(o, dict) and o.get("is_do_nothing") for o in options):
+            fails.append(_fail("missing_do_nothing", "options", "one option must be do-nothing"))
+        ids = {o.get("id") for o in options if isinstance(o, dict)}
     if answers["favorite_option_id"] not in ids:
         fails.append(_fail("bad_option", "favorite_option_id", "favorite not in options"))
-    if answers["recommendation"].get("option_id") not in ids:
+    recommendation = answers["recommendation"]
+    if not isinstance(recommendation, dict):
+        fails.append(_fail("bad_type", "recommendation", "recommendation must be an object"))
+    elif recommendation.get("option_id") not in ids:
         fails.append(_fail("bad_option", "recommendation.option_id", "recommendation not in options"))
     if answers["doc_action"] == "new":
         override = answers.get("duplicate_override")

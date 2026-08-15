@@ -5,6 +5,7 @@ from pathlib import Path
 from trust_intake.answers import PROSE_MIN, validate_answers
 from trust_intake.inventory_lint import lint_inventory
 from trust_intake.ledger import build_ledger, unresolved_quantities
+from trust_intake.match_inventory import match
 from trust_intake.render import is_approved
 from trust_intake.run_store import read_json, run_dir, write_json
 
@@ -57,9 +58,17 @@ def validate_run(run_id: str, runs_dir: Path, inventory: dict) -> tuple[int, dic
     if not memo_path.is_file():
         failures.append(_fail("missing_memo", "workshop-memo.md", "workshop-memo.md missing"))
 
-    overlaps = _read_optional(run_id, "overlaps.json", runs_dir, {"overlaps": []})
     facts = _read_optional(run_id, "facts.json", runs_dir, {"derived": []})
     estimates = _read_optional(run_id, "estimates.json", runs_dir, {"estimates": []})
+    overlaps_path = dest / "overlaps.json"
+    if overlaps_path.is_file():
+        overlaps = read_json(run_id, "overlaps.json", runs_dir)
+    elif answers is not None and "title" in answers and "journey" in answers:
+        overlaps = match(answers, inventory)
+    else:
+        overlaps = {"overlaps": []}
+        if answers is not None and answers.get("doc_action") == "new":
+            failures.append(_fail("missing_file", "overlaps.json", "overlaps.json missing"))
 
     if answers is not None and answers.get("doc_action") == "new" and overlaps.get("overlaps"):
         override = answers.get("duplicate_override")

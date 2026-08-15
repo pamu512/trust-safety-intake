@@ -77,7 +77,9 @@ def _resolve(ctx: dict, path: str) -> str:
     parts = path.split(".")
     if parts[0] == "ledger" and len(parts) == 2:
         row = _ledger_row(ctx.get("ledger"), parts[1])
-        return format_ledger_value(row) if row else ""
+        if row is None:
+            raise ValueError(f"missing ledger slot: {parts[1]}")
+        return format_ledger_value(row)
     cur: object = ctx
     for part in parts:
         if not isinstance(cur, dict) or part not in cur:
@@ -121,6 +123,7 @@ def _context(answers: dict, facts: dict, overlaps: dict, estimates: dict, ledger
         "estimates": estimates,
         "ledger": ledger,
         "options": answers.get("options") or [],
+        "unknown": list(estimates.get("unknown") or []),
     }
 
 
@@ -184,9 +187,18 @@ def render_to_run(run_id: str, runs_dir: Path, templates_dir: Path = Path("templ
     if not is_approved(run_id, runs_dir):
         raise PermissionError("APPROVED missing")
     answers = read_json(run_id, "answers.json", runs_dir)
-    facts = read_json(run_id, "facts.json", runs_dir)
-    overlaps = read_json(run_id, "overlaps.json", runs_dir)
-    estimates = read_json(run_id, "estimates.json", runs_dir)
+    try:
+        facts = read_json(run_id, "facts.json", runs_dir)
+    except FileNotFoundError:
+        facts = {"tables": [], "derived": []}
+    try:
+        overlaps = read_json(run_id, "overlaps.json", runs_dir)
+    except FileNotFoundError:
+        overlaps = {"overlaps": []}
+    try:
+        estimates = read_json(run_id, "estimates.json", runs_dir)
+    except FileNotFoundError:
+        estimates = {"estimates": []}
     ledger = build_ledger(facts, answers, estimates)
     text = render_doc(answers["doc_type"], answers, facts, overlaps, estimates, ledger, templates_dir)
     dest = run_dir(run_id, runs_dir) / "draft.md"

@@ -65,3 +65,15 @@ def test_missing_do_nothing_fails():
 
 def test_expand_all_brands():
     assert expand_brands(["all"]) == ["foodora", "foodpanda", "yemeksepeti"]
+
+
+def test_wrong_types_are_bad_type():
+    for key, value in (
+        ("success", "refund-abuse-rate"),
+        ("recommendation", "ship it"),
+        ("options", "do-nothing"),
+    ):
+        a = _complete()
+        a[key] = value
+        fails = validate_answers(a)
+        assert any(f["code"] == "bad_type" and f["path"] == key for f in fails), key
