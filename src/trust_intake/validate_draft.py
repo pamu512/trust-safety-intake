@@ -18,9 +18,35 @@ SHARED_HEADINGS = (
 )
 
 DOC_HEADINGS = {
-    "brd": ("## Problem", "## Business requirements", "## Metrics", "## Non-goals"),
-    "prd": ("## Solution", "## Journeys", "## In scope", "## Out of scope", "## Acceptance criteria", "## Non-goals"),
-    "business-case": ("## Cost", "## Impact", "## Options comparison", "## Ask"),
+    "brd": (
+        "## Executive summary",
+        "## Problem",
+        "## Current product",
+        "## Business requirements",
+        "## Metrics",
+        "## Non-goals",
+        "## Ask",
+    ),
+    "prd": (
+        "## Executive summary",
+        "## Solution",
+        "## Journeys",
+        "## Current product",
+        "## In scope",
+        "## Out of scope",
+        "## Acceptance criteria",
+        "## Non-goals",
+        "## Ask",
+    ),
+    "business-case": (
+        "## Executive summary",
+        "## Current product",
+        "## Cost",
+        "## Impact",
+        "## Options comparison",
+        "## Non-goals",
+        "## Ask",
+    ),
     "case-study": ("## Before", "## Intervention", "## After"),
 }
 

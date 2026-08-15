@@ -1,0 +1,53 @@
+{
+  "title": "Promo stacking cap for foodora",
+  "decision": "ship",
+  "success": {
+    "metric": "promo-stack-rate",
+    "direction": "down",
+    "target": "Finance-signed reduction"
+  },
+  "approvers": ["finance", "brand-pnl"],
+  "brands": ["foodora"],
+  "journey": "promo",
+  "already_ships": "Foodora has a manual promo cap and a weekly ops review. Last year showed 8% stacked-promo abuse and about €1.8M loss on the promo journey.",
+  "doc_action": "new",
+  "amend_target_id": null,
+  "duplicate_override": null,
+  "elapsed_fraction": null,
+  "shares": {},
+  "doc_type": "brd",
+  "needed_metrics": {
+    "volume": {"value": 50000, "unit": "orders"},
+    "rate": {"value": 0.08, "unit": "%"},
+    "euro_impact": {"value": 1800000, "unit": "EUR"},
+    "trend": {"value": null, "unit": null},
+    "baseline": {"value": null, "unit": null},
+    "cx_fp_cost": {"value": null, "unit": null}
+  },
+  "numbers_from_author": [],
+  "options": [
+    {
+      "id": "do-nothing",
+      "title": "Keep the weekly review",
+      "summary": "Leave the manual promo cap and weekly ops review unchanged for this quarter.",
+      "is_do_nothing": true
+    },
+    {
+      "id": "hard-cap",
+      "title": "Hard stack cap",
+      "summary": "Ship a hard cap of one paid promo per checkout and measure stack rate before widening.",
+      "is_do_nothing": false
+    }
+  ],
+  "favorite_option_id": "hard-cap",
+  "devils_advocate": {
+    "why_fails": "A hard cap will block legitimate multi-voucher campaigns and spike support tickets in week one.",
+    "who_loses": "Growth and brand-PnL teams that rely on stacked acquisition codes in DE and AT.",
+    "cannot_measure": "True displacement of stacking rings will not show in ninety days of one brand.",
+    "why_not_live_control": "The weekly review already catches the loudest stacks after the order is placed."
+  },
+  "recommendation": {
+    "option_id": "hard-cap",
+    "argument": "The locked outcome is a Finance-grade cut in stack rate; only a hard cap produces a measurable 90-day proof."
+  }
+}

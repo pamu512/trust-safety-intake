@@ -1,0 +1,32 @@
+jql: 'project = TS AND status != Cancelled'
+browse_base: ""
+id_prefix: doc-jira-
+control_prefix: ctl-jira-
+control_label: capability
+control_labels: [capability]
+# Jira brand labels are generic. Factory still stores foodora / foodpanda / yemeksepeti.
+# brand 1 / brand-1 / brand1 always map in that order. Add more aliases here if needed.
+brand_labels:
+  brand 1: ["brand 1", brand-1]
+  brand-2: ["brand 2", brand-2]
+  brand-3: ["brand 3", brand-3]
+journey_labels:
+  account: [account]
+  promo: [promo]
+  checkout: [checkout]
+  claims-cancel: [claims-cancel]
+  payout: [payout]
+  cross-journey: [cross-journey]
+default_control_type: ops
+default_owner: jira
+defaults:
+  journey: cross-journey
+  brands: []
+status_docs:
+  To Do: open
+  In Progress: open
+  Done: shipped
+status_controls:
+  To Do: planned
+  In Progress: pilot
+  Done: live

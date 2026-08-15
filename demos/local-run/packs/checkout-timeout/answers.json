@@ -1,0 +1,53 @@
+{
+  "title": "Checkout timeout retry for yemeksepeti",
+  "decision": "ship",
+  "success": {
+    "metric": "checkout-timeout-loss",
+    "direction": "down",
+    "target": "Finance-signed reduction"
+  },
+  "approvers": ["finance", "product"],
+  "brands": ["yemeksepeti"],
+  "journey": "checkout",
+  "already_ships": "Yemeksepeti retries failed payments once. Last year 1.5% of checkouts timed out with about €3.2M attributed loss on the checkout journey.",
+  "doc_action": "new",
+  "amend_target_id": null,
+  "duplicate_override": null,
+  "elapsed_fraction": 0.5,
+  "shares": {},
+  "doc_type": "business-case",
+  "needed_metrics": {
+    "volume": {"value": 120000, "unit": "orders"},
+    "rate": {"value": 0.015, "unit": "%"},
+    "euro_impact": {"value": 3200000, "unit": "EUR"},
+    "trend": {"value": null, "unit": null},
+    "baseline": {"value": null, "unit": null},
+    "cx_fp_cost": {"value": null, "unit": null}
+  },
+  "numbers_from_author": [],
+  "options": [
+    {
+      "id": "do-nothing",
+      "title": "Keep one retry",
+      "summary": "Leave the single payment retry and current timeout window unchanged this quarter.",
+      "is_do_nothing": true
+    },
+    {
+      "id": "second-retry",
+      "title": "Second retry + hold",
+      "summary": "Add a second retry after 30 seconds and hold the basket so the customer does not re-order.",
+      "is_do_nothing": false
+    }
+  ],
+  "favorite_option_id": "second-retry",
+  "devils_advocate": {
+    "why_fails": "A second retry can double-charge and create a claims spike that eats the saved checkout GMV.",
+    "who_loses": "Customers billed twice and the claims team that has to unwind those payments.",
+    "cannot_measure": "Net GMV after chargebacks will not be clean in ninety days of one brand.",
+    "why_not_live_control": "The existing single retry already recovers the obvious drop-offs without a double-charge risk."
+  },
+  "recommendation": {
+    "option_id": "second-retry",
+    "argument": "The locked outcome is a Finance-grade cut in timeout loss; a measured second retry is the only option that can prove it."
+  }
+}

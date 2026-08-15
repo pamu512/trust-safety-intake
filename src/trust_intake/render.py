@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import re
 from pathlib import Path
 
-from trust_intake.answers import PROSE_PATHS
+from trust_intake.answers import NEEDED_SLOTS, PROSE_PATHS
 from trust_intake.ledger import build_ledger
 from trust_intake.run_store import read_json, run_dir
 
@@ -99,8 +100,10 @@ def render_template(text: str, ctx: dict) -> str:
         chunks: list[str] = []
         for item in items:
             row = dict(item) if isinstance(item, dict) else {"value": item}
-            if key == "ledger":
+            if isinstance(item, dict) and "name" in item and "value" in item:
+                row["display"] = format_ledger_value(item)
                 row["validate_flag"] = "Validate" if row.get("source") == "ESTIMATE" else ""
+            if key == "ledger":
                 row["value"] = _plain_number(row.get("value"))
             chunks.append(_render_vars(body, {**ctx, **row}))
         return "".join(chunks)
@@ -115,6 +118,14 @@ def _require_prose(answers: dict) -> None:
             raise ValueError(f"required prose empty: {path}")
 
 
+def _favorite(answers: dict) -> dict:
+    fid = answers.get("favorite_option_id")
+    for opt in answers.get("options") or []:
+        if isinstance(opt, dict) and opt.get("id") == fid:
+            return opt
+    return {}
+
+
 def _context(answers: dict, facts: dict, overlaps: dict, estimates: dict, ledger: list[dict]) -> dict:
     return {
         "answers": answers,
@@ -124,6 +135,9 @@ def _context(answers: dict, facts: dict, overlaps: dict, estimates: dict, ledger
         "ledger": ledger,
         "options": answers.get("options") or [],
         "unknown": list(estimates.get("unknown") or []),
+        "favorite": _favorite(answers),
+        "overlap_rows": list((overlaps or {}).get("overlaps") or []),
+        "metric_rows": [row for row in ledger if row.get("name") in NEEDED_SLOTS],
     }
 
 
@@ -172,15 +186,31 @@ def render_doc(
     return _render(DOC_FILES[doc_type], answers, facts, overlaps, estimates, ledger, templates_dir)
 
 
-def write_approved(run_id: str, runs_dir: Path) -> Path:
+def memo_sha(run_id: str, runs_dir: Path) -> str:
+    path = run_dir(run_id, runs_dir) / "workshop-memo.md"
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_approved(run_id: str, runs_dir: Path, confirm: str) -> Path:
+    expected = memo_sha(run_id, runs_dir)
+    if str(confirm).strip() != expected:
+        raise ValueError("confirm does not match workshop-memo.md")
     path = run_dir(run_id, runs_dir) / "APPROVED"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("", encoding="utf-8")
+    path.write_text(expected + "\n", encoding="utf-8")
     return path
 
 
 def is_approved(run_id: str, runs_dir: Path) -> bool:
-    return (run_dir(run_id, runs_dir) / "APPROVED").is_file()
+    path = run_dir(run_id, runs_dir) / "APPROVED"
+    if not path.is_file():
+        return False
+    try:
+        return path.read_text(encoding="utf-8").strip() == memo_sha(run_id, runs_dir)
+    except FileNotFoundError:
+        return False
 
 
 def render_to_run(run_id: str, runs_dir: Path, templates_dir: Path = Path("templates")) -> Path:

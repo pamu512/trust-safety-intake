@@ -1,0 +1,27 @@
+{
+  "issues": [
+    {
+      "key": "TS-1234",
+      "title": "Account takeover step-up Q3",
+      "status": "In Progress",
+      "labels": ["brand 2", "account", "capability"],
+      "url": "https://jira.example/browse/TS-1234",
+      "description": "Do not import this €12M case-pack figure."
+    },
+    {
+      "key": "TS-99",
+      "fields": {
+        "summary": "Promo stacking cap",
+        "status": {"name": "To Do"},
+        "labels": ["brand 1", "promo"],
+        "description": "secret"
+      }
+    },
+    {
+      "key": "TS-1",
+      "title": "Q3 hardening",
+      "status": "To Do",
+      "labels": ["platform"]
+    }
+  ]
+}

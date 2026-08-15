@@ -81,6 +81,24 @@ def test_peer_brand_ratio_strips_full_slot_prefix():
     assert est["value"] == 200
 
 
+def test_share_of_parent_uses_parsed_column_total():
+    answers = {
+        "needed_metrics": _needed(),
+        "elapsed_fraction": None,
+        "numbers_from_author": [],
+        "shares": {"euro_impact": 0.4},
+        "brands": ["foodpanda"],
+    }
+    facts = {
+        "derived": [],
+        "tables": [{"name": "loss", "totals": {"loss_eur": 1_000_000}, "splits": [], "series": []}],
+    }
+    out = extrapolate(answers, facts)
+    est = next(e for e in out["estimates"] if e["name"] == "euro_impact")
+    assert est["method"] == "share-of-parent"
+    assert est["value"] == 400_000
+
+
 def test_foodpanda_column_does_not_map_to_rate():
     answers = {
         "needed_metrics": _needed(

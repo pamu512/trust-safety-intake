@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from trust_intake.answers import NEEDED_SLOTS
+from trust_intake.answers import BRANDS, NEEDED_SLOTS
 from trust_intake.ledger import build_ledger
 
 RANGES = {
@@ -20,9 +20,44 @@ COLUMN_TO_SLOT = (
 _TOKEN_RE = re.compile(r"[^a-z0-9]+")
 
 
+def _parse_aliases(facts: dict) -> dict[str, dict]:
+    extra: dict[str, dict] = {}
+    for table in facts.get("tables") or []:
+        tname = table.get("name") or "table"
+        for col, total in (table.get("totals") or {}).items():
+            slot = _slot_from_column(col)
+            if slot:
+                extra.setdefault(
+                    f"parent_{slot}",
+                    {"name": f"{tname}.{col}.sum", "value": float(total), "unit": None},
+                )
+        for split in table.get("splits") or []:
+            key = str(split.get("key") or "").strip().lower()
+            if key not in BRANDS:
+                continue
+            for col, val in (split.get("values") or {}).items():
+                if val is None:
+                    continue
+                if _has_alias(col, ("gmv",)):
+                    extra.setdefault(
+                        f"gmv_{key}",
+                        {"name": f"{tname}.{key}.{col}", "value": float(val), "unit": None},
+                    )
+                slot = _slot_from_column(col)
+                if slot:
+                    extra.setdefault(
+                        f"{slot}_{key}",
+                        {"name": f"{tname}.{key}.{col}", "value": float(val), "unit": None},
+                    )
+    return extra
+
+
 def _ledger_map(answers: dict, facts: dict) -> dict[str, dict]:
     rows = build_ledger(facts, answers, {"estimates": []})
-    return {r["name"]: r for r in rows}
+    out = {r["name"]: r for r in rows}
+    for name, row in _parse_aliases(facts).items():
+        out.setdefault(name, row)
+    return out
 
 
 def _range(value: float, method: str) -> dict:

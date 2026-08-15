@@ -9,6 +9,14 @@ def test_build_unions_three_sources():
     assert names == {"loss.sum", "volume", "euro_impact"}
 
 
+def test_needed_metrics_land_on_ledger_without_dual_write():
+    answers = {"needed_metrics": {"volume": {"value": 10000, "unit": "claims"}, "euro_impact": {"value": 2500000, "unit": "EUR"}}}
+    names = {r["name"]: r for r in build_ledger({"derived": []}, answers, {"estimates": []})}
+    assert names["volume"]["value"] == 10000
+    assert names["euro_impact"]["value"] == 2_500_000
+    assert names["volume"]["source"] == "interview"
+
+
 def test_scan_ignores_ninety_day():
     tokens = scan_quantities("In 90-day window refunds are €2.5M at 12% of claims.")
     values = {v for _, v in tokens}

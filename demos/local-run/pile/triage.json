@@ -1,0 +1,187 @@
+{
+  "cards": [
+    {
+      "id": "account-takeover-copy",
+      "path": "/Users/pamu/Projects/trust-safety-intake/demos/local-run/pile/account-takeover-copy.md",
+      "title": "Account takeover step-up for foodpanda",
+      "brands": [
+        "foodpanda"
+      ],
+      "markets": [
+        "HK",
+        "SG"
+      ],
+      "journey": "unknown",
+      "euro_impact": {
+        "value": 900000.0,
+        "unit": "EUR",
+        "source": "extract"
+      },
+      "volume": {
+        "value": 20000.0,
+        "unit": "flags",
+        "source": "extract"
+      },
+      "rate": {
+        "value": 0.03,
+        "unit": "%",
+        "source": "extract"
+      },
+      "labels": [
+        "deprioritise",
+        "unify"
+      ],
+      "reasons": [
+        "already-ships"
+      ],
+      "inventory_overlaps": [
+        {
+          "id": "doc-20260815-125816-account-takeover-step-up-for-foodpanda",
+          "kind": "doc",
+          "title": "Account takeover step-up for foodpanda",
+          "score": 1.0
+        }
+      ],
+      "cluster_id": "cluster-account-takeover-copy"
+    },
+    {
+      "id": "account-takeover",
+      "path": "/Users/pamu/Projects/trust-safety-intake/demos/local-run/pile/account-takeover.md",
+      "title": "Account takeover step-up for foodpanda",
+      "brands": [
+        "foodpanda"
+      ],
+      "markets": [
+        "HK",
+        "SG"
+      ],
+      "journey": "unknown",
+      "euro_impact": {
+        "value": 900000.0,
+        "unit": "EUR",
+        "source": "extract"
+      },
+      "volume": {
+        "value": 20000.0,
+        "unit": "flags",
+        "source": "extract"
+      },
+      "rate": {
+        "value": 0.03,
+        "unit": "%",
+        "source": "extract"
+      },
+      "labels": [
+        "deprioritise",
+        "unify"
+      ],
+      "reasons": [
+        "already-ships"
+      ],
+      "inventory_overlaps": [
+        {
+          "id": "doc-20260815-125816-account-takeover-step-up-for-foodpanda",
+          "kind": "doc",
+          "title": "Account takeover step-up for foodpanda",
+          "score": 1.0
+        }
+      ],
+      "cluster_id": "cluster-account-takeover-copy"
+    },
+    {
+      "id": "checkout-timeout",
+      "path": "/Users/pamu/Projects/trust-safety-intake/demos/local-run/pile/checkout-timeout.md",
+      "title": "Checkout timeout retry for yemeksepeti",
+      "brands": [
+        "yemeksepeti"
+      ],
+      "markets": [],
+      "journey": "checkout",
+      "euro_impact": {
+        "value": 3200000.0,
+        "unit": "EUR",
+        "source": "extract"
+      },
+      "volume": {
+        "value": 120000.0,
+        "unit": "orders",
+        "source": "extract"
+      },
+      "rate": {
+        "value": 0.015,
+        "unit": "%",
+        "source": "extract"
+      },
+      "labels": [
+        "deprioritise"
+      ],
+      "reasons": [
+        "already-ships"
+      ],
+      "inventory_overlaps": [
+        {
+          "id": "doc-20260815-125816-checkout-timeout-retry-for-yemeksepeti",
+          "kind": "doc",
+          "title": "Checkout timeout retry for yemeksepeti",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "id": "promo-stacking",
+      "path": "/Users/pamu/Projects/trust-safety-intake/demos/local-run/pile/promo-stacking.md",
+      "title": "Promo stacking cap for foodora",
+      "brands": [
+        "foodora"
+      ],
+      "markets": [
+        "AT",
+        "DE"
+      ],
+      "journey": "cross-journey",
+      "euro_impact": {
+        "value": 1800000.0,
+        "unit": "EUR",
+        "source": "extract"
+      },
+      "volume": {
+        "value": 50000.0,
+        "unit": "orders",
+        "source": "extract"
+      },
+      "rate": {
+        "value": 0.08,
+        "unit": "%",
+        "source": "extract"
+      },
+      "labels": [
+        "high-priority"
+      ],
+      "reasons": [],
+      "inventory_overlaps": []
+    }
+  ],
+  "clusters": [
+    {
+      "id": "cluster-account-takeover-copy",
+      "members": [
+        "account-takeover-copy",
+        "account-takeover"
+      ],
+      "survivor": "account-takeover-copy",
+      "pairwise": [
+        {
+          "a": "account-takeover-copy",
+          "b": "account-takeover",
+          "score": 1.0
+        }
+      ],
+      "markets": [
+        "HK",
+        "SG"
+      ]
+    }
+  ],
+  "warnings": [],
+  "min_euro": 100000
+}

@@ -17,12 +17,23 @@ def _suffix(mult: str | None) -> float:
 
 def build_ledger(facts: dict, answers: dict, estimates: dict) -> list[dict]:
     rows: list[dict] = []
+    seen: set[str] = set()
+
+    def _add(name: str, value, unit, source: str) -> None:
+        if name in seen or value is None:
+            return
+        seen.add(name)
+        rows.append({"name": name, "value": value, "unit": unit, "source": source})
+
     for item in facts.get("derived") or []:
-        rows.append({"name": item["name"], "value": item["value"], "unit": item.get("unit"), "source": "csv"})
+        _add(item["name"], item["value"], item.get("unit"), "csv")
+    for slot, metric in (answers.get("needed_metrics") or {}).items():
+        if isinstance(metric, dict):
+            _add(slot, metric.get("value"), metric.get("unit"), "interview")
     for item in answers.get("numbers_from_author") or []:
-        rows.append({"name": item["name"], "value": item["value"], "unit": item.get("unit"), "source": "interview"})
+        _add(item["name"], item["value"], item.get("unit"), "interview")
     for item in (estimates or {}).get("estimates") or []:
-        rows.append({"name": item["name"], "value": item["value"], "unit": item.get("unit"), "source": "ESTIMATE"})
+        _add(item["name"], item["value"], item.get("unit"), "ESTIMATE")
     return rows
 
 

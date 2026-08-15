@@ -44,5 +44,4 @@ def complete_answers() -> dict:
         }
     )
     a["needed_metrics"]["volume"] = {"value": 10000, "unit": "claims"}
-    a["numbers_from_author"] = [{"name": "volume", "value": 10000, "unit": "claims", "source": "interview"}]
     return a

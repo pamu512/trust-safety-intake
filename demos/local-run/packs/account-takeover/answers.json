@@ -1,0 +1,59 @@
+{
+  "title": "Account takeover step-up for foodpanda",
+  "decision": "fund",
+  "success": {
+    "metric": "ato-rate",
+    "direction": "down",
+    "target": "Hold or better vs last quarter"
+  },
+  "approvers": ["product", "eng"],
+  "brands": ["foodpanda"],
+  "journey": "account",
+  "already_ships": "Foodpanda runs a device-graph review queue. Last quarter logged 20000 flags at a 3% takeover rate, about €900k loss on the account journey.",
+  "doc_action": "new",
+  "amend_target_id": null,
+  "duplicate_override": null,
+  "elapsed_fraction": null,
+  "shares": {},
+  "doc_type": "prd",
+  "needed_metrics": {
+    "volume": {"value": 20000, "unit": "flags"},
+    "rate": {"value": 0.03, "unit": "%"},
+    "euro_impact": {"value": 900000, "unit": "EUR"},
+    "trend": {"value": null, "unit": null},
+    "baseline": {"value": null, "unit": null},
+    "cx_fp_cost": {"value": null, "unit": null}
+  },
+  "numbers_from_author": [],
+  "options": [
+    {
+      "id": "do-nothing",
+      "title": "Keep the review queue",
+      "summary": "Leave the device-graph queue and current step-up rules unchanged this quarter.",
+      "is_do_nothing": true
+    },
+    {
+      "id": "step-up",
+      "title": "Step-up on new device",
+      "summary": "Add a step-up challenge on new-device login and measure ATO rate plus false-positive cost.",
+      "is_do_nothing": false
+    },
+    {
+      "id": "kill-queue",
+      "title": "Drop the queue",
+      "summary": "Retire the manual device-graph queue and rely only on the existing password reset flow.",
+      "is_do_nothing": false
+    }
+  ],
+  "favorite_option_id": "step-up",
+  "devils_advocate": {
+    "why_fails": "Step-up will bounce good riders on shared phones and inflate login drop-off in SG and HK.",
+    "who_loses": "Honest customers on family devices and the CX team that absorbs the extra tickets.",
+    "cannot_measure": "True ATO displacement versus password-reset fraud will not show in ninety days.",
+    "why_not_live_control": "The device-graph queue already covers the loudest takeover pattern after the fact."
+  },
+  "recommendation": {
+    "option_id": "step-up",
+    "argument": "The locked outcome is a funded experiment on ATO rate; only a step-up trial produces that 90-day signal."
+  }
+}

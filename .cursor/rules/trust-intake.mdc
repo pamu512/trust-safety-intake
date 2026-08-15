@@ -1,0 +1,14 @@
+---
+description: Never freehand a Trust & Safety BRD; use the intake CLI through decide
+alwaysApply: true
+---
+
+# Trust intake
+
+If the user asks for a BRD / PRD / business case / case study, the first command is `trust-intake init`. Never write that document in chat or as a markdown file.
+
+Read `skills/trust-intake/SKILL.md`. Interview only.
+
+Do not run `trust-intake approve`. After `memo`, give the author the printed `--confirm` command.
+
+You are not done until `trust-intake decide` exits 0 (`--run` after a write-path, or the author runs `--triage`).

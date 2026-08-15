@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from trust_intake.ledger import build_ledger
-from trust_intake.render import render_memo, render_to_run, write_approved
+from trust_intake.render import memo_sha, render_memo, render_to_run, write_approved
 from trust_intake.run_store import init_run, write_json
 from trust_intake.validate_draft import validate_run
 
@@ -37,7 +37,7 @@ def _write_memo_run(tmp_path: Path, answers: dict) -> str:
 
 def test_golden_complete_run_exits_0_draft_stage(tmp_path: Path, complete_answers):
     run_id = _write_memo_run(tmp_path, complete_answers)
-    write_approved(run_id, tmp_path)
+    write_approved(run_id, tmp_path, memo_sha(run_id, tmp_path))
     render_to_run(run_id, tmp_path, TEMPLATES)
     code, result = validate_run(run_id, tmp_path, CLEAN_INVENTORY)
     assert code == 0
@@ -64,7 +64,7 @@ def test_missing_devils_advocate_exits_1(tmp_path: Path, complete_answers):
 
 def test_unresolved_quantity_in_draft_exits_1(tmp_path: Path, complete_answers):
     run_id = _write_memo_run(tmp_path, complete_answers)
-    write_approved(run_id, tmp_path)
+    write_approved(run_id, tmp_path, memo_sha(run_id, tmp_path))
     draft = render_to_run(run_id, tmp_path, TEMPLATES)
     draft.write_text(draft.read_text(encoding="utf-8") + "\n€12M\n", encoding="utf-8")
     code, result = validate_run(run_id, tmp_path, CLEAN_INVENTORY)

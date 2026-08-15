@@ -1,0 +1,84 @@
+brands:
+- foodora
+- foodpanda
+- yemeksepeti
+journeys:
+- account
+- promo
+- checkout
+- claims-cancel
+- payout
+- cross-journey
+stack:
+- id: rules
+  name: Rules engine
+  layer: decisioning
+  notes: Parameterize before new PRDs
+- id: ml-score
+  name: ML risk score
+  layer: decisioning
+  notes: Maturity to map
+- id: sql-wh
+  name: SQL warehouse
+  layer: data
+  notes: ''
+- id: looker
+  name: Looker
+  layer: reporting
+  notes: ''
+- id: manual-inv
+  name: Manual investigations
+  layer: ops
+  notes: ''
+controls:
+- id: ctl-refund-static
+  name: Repeat claimant rule
+  type: rule
+  journey: claims-cancel
+  brands:
+  - foodpanda
+  status: live
+  owner: ops
+  related_docs:
+  - doc-ex-1
+docs:
+- id: doc-ex-1
+  type: brd
+  title: Repeat claimant static rule
+  status: shipped
+  journey: claims-cancel
+  brands:
+  - foodpanda
+  link: ''
+- id: doc-20260815-125816-promo-stacking-cap-for-foodora
+  type: brd
+  title: Promo stacking cap for foodora
+  status: approved
+  journey: promo
+  brands:
+  - foodora
+  link: 20260815-125816-promo-stacking-cap-for-foodora
+- id: doc-20260815-125816-account-takeover-step-up-for-foodpanda
+  type: prd
+  title: Account takeover step-up for foodpanda
+  status: approved
+  journey: account
+  brands:
+  - foodpanda
+  link: 20260815-125816-account-takeover-step-up-for-foodpanda
+- id: doc-20260815-125816-checkout-timeout-retry-for-yemeksepeti
+  type: business-case
+  title: Checkout timeout retry for yemeksepeti
+  status: approved
+  journey: checkout
+  brands:
+  - yemeksepeti
+  link: 20260815-125816-checkout-timeout-retry-for-yemeksepeti
+- id: doc-promo-stacking
+  type: brd
+  title: Promo stacking cap for foodora
+  status: open
+  journey: cross-journey
+  brands:
+  - foodora
+  link: /Users/pamu/Projects/trust-safety-intake/demos/local-run/pile/promo-stacking.md

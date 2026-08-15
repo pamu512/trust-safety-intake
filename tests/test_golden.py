@@ -3,6 +3,7 @@ import shutil
 
 from trust_intake.cli import main
 from trust_intake.ledger import build_ledger, unresolved_quantities
+from trust_intake.render import memo_sha
 from trust_intake.run_store import read_json
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,15 +41,23 @@ def _stage(src: Path, tmp_path: Path, run_id: str) -> Path:
 
 def _pipeline(tmp_path: Path, run_id: str, csv_path: Path) -> list[int]:
     flags = _flags(tmp_path, run_id)
-    return [
+    codes = [
         main(["parse", str(csv_path), *flags]),
         main(["match", *flags]),
         main(["extrapolate", *flags]),
         main(["memo", *flags]),
-        main(["approve", *flags]),
-        main(["render", *flags]),
-        main(["validate", *flags]),
     ]
+    try:
+        codes.append(main(["approve", *flags, "--confirm", memo_sha(run_id, tmp_path)]))
+    except FileNotFoundError:
+        codes.append(2)
+    codes.extend(
+        [
+            main(["render", *flags]),
+            main(["validate", *flags]),
+        ]
+    )
+    return codes
 
 
 def test_golden_refund_abuse_validate_exits_0(tmp_path: Path):

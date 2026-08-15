@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from trust_intake.cli import main
+from trust_intake.render import memo_sha
 from trust_intake.run_store import write_json
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -117,5 +118,6 @@ def test_run_without_file_then_render_exits_0(tmp_path: Path, complete_answers):
         str(INVENTORY),
     ]
     assert main(["run", *flags]) == 0
-    assert main(["approve", *flags]) == 0
+    assert main(["approve", *flags]) == 1
+    assert main(["approve", *flags, "--confirm", memo_sha(run_id, tmp_path)]) == 0
     assert main(["render", *flags]) == 0

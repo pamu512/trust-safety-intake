@@ -44,3 +44,13 @@ def test_score_weights():
     item = {"title": "Repeat claimant static rule", "name": "Repeat claimant static rule", "journey": "claims-cancel", "brands": ["foodpanda"]}
     s = score_overlap("Repeat claimant static rule", "claims-cancel", ["foodpanda"], item)
     assert s == 1.0
+
+
+def test_unrelated_title_same_journey_brand_no_overlap():
+    answers = {
+        "title": "Vendor payout delay",
+        "journey": "claims-cancel",
+        "brands": ["foodpanda"],
+    }
+    out = match(answers, INV)
+    assert out["overlaps"] == []

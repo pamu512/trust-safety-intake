@@ -5,6 +5,7 @@ import pytest
 from trust_intake.ledger import build_ledger
 from trust_intake.render import (
     is_approved,
+    memo_sha,
     render_doc,
     render_memo,
     render_to_run,
@@ -15,9 +16,35 @@ from trust_intake.run_store import init_run, write_json
 TEMPLATES = Path(__file__).resolve().parents[1] / "templates"
 
 EXTRA_HEADINGS = {
-    "brd": ["## Problem", "## Business requirements", "## Metrics", "## Non-goals"],
-    "prd": ["## Solution", "## Journeys", "## In scope", "## Out of scope", "## Acceptance criteria", "## Non-goals"],
-    "business-case": ["## Cost", "## Impact", "## Options comparison", "## Ask"],
+    "brd": [
+        "## Executive summary",
+        "## Problem",
+        "## Current product",
+        "## Business requirements",
+        "## Metrics",
+        "## Non-goals",
+        "## Ask",
+    ],
+    "prd": [
+        "## Executive summary",
+        "## Solution",
+        "## Journeys",
+        "## Current product",
+        "## In scope",
+        "## Out of scope",
+        "## Acceptance criteria",
+        "## Non-goals",
+        "## Ask",
+    ],
+    "business-case": [
+        "## Executive summary",
+        "## Current product",
+        "## Cost",
+        "## Impact",
+        "## Options comparison",
+        "## Non-goals",
+        "## Ask",
+    ],
     "case-study": ["## Before", "## Intervention", "## After"],
 }
 
@@ -52,6 +79,18 @@ def test_each_doc_has_extra_headings_advocate_do_nothing_and_ledger_volume(compl
         assert "do-nothing" in text
         assert "{{ledger.volume}}" not in text
         assert "10000" in text
+        if doc_type == "brd":
+            assert "R1 — Chosen option" in text
+            assert "Holdout + policy" in text
+            assert "## Ask" in text
+        if doc_type == "prd":
+            assert "AC1 — Option" in text
+            assert "Holdout + policy" in text
+            assert "## Ask" in text
+        if doc_type == "business-case":
+            assert "€2.5M" in text
+            assert "Holdout + policy" in text
+            assert "Do-nothing is in the table" in text
 
 
 def test_render_memo_has_advocate_do_nothing_and_ledger_volume(complete_answers):
@@ -91,10 +130,15 @@ def test_write_approved_then_render_to_run(tmp_path: Path, complete_answers):
     write_json(run_id, "facts.json", facts, tmp_path)
     write_json(run_id, "overlaps.json", overlaps, tmp_path)
     write_json(run_id, "estimates.json", estimates, tmp_path)
-    path = write_approved(run_id, tmp_path)
+    render_memo(complete_answers, facts, overlaps, estimates, ledger, TEMPLATES, run_id=run_id, runs_dir=tmp_path)
+    sha = memo_sha(run_id, tmp_path)
+    path = write_approved(run_id, tmp_path, sha)
     assert path.name == "APPROVED"
-    assert path.read_text(encoding="utf-8") == ""
+    assert path.read_text(encoding="utf-8").strip() == sha
     assert is_approved(run_id, tmp_path)
+    (tmp_path / run_id / "APPROVED").write_text("", encoding="utf-8")
+    assert not is_approved(run_id, tmp_path)
+    write_approved(run_id, tmp_path, sha)
     draft = render_to_run(run_id, tmp_path, TEMPLATES)
     assert draft.name == "draft.md"
     text = draft.read_text(encoding="utf-8")

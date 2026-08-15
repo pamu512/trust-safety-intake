@@ -21,6 +21,11 @@ def load_inventory(path: Path) -> dict:
     return data
 
 
+def save_inventory(path: Path, data: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8")
+
+
 def lint_inventory(data: dict) -> list[dict]:
     fails: list[dict] = []
     for key in ("brands", "journeys", "stack", "controls", "docs"):

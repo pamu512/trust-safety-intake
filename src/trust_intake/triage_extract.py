@@ -103,7 +103,7 @@ def _quantities(text: str) -> tuple[float | None, float | None, float | None, st
             euro = value
             euro_est = estimate
         elif rate is None and "%" in token:
-            rate = value * 100.0
+            rate = value
             rate_est = estimate
         elif volume is None:
             unit_match = re.search("|".join(_VOLUME_UNITS), token, flags=re.I)

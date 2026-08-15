@@ -1,0 +1,59 @@
+{
+  "id": "dec-triage-pile",
+  "source": "triage",
+  "locked": {
+    "kind": "labels",
+    "cards": [
+      {
+        "id": "account-takeover-copy",
+        "title": "Account takeover step-up for foodpanda",
+        "labels": [
+          "deprioritise",
+          "unify"
+        ],
+        "cluster_id": "cluster-account-takeover-copy"
+      },
+      {
+        "id": "account-takeover",
+        "title": "Account takeover step-up for foodpanda",
+        "labels": [
+          "deprioritise",
+          "unify"
+        ],
+        "cluster_id": "cluster-account-takeover-copy"
+      },
+      {
+        "id": "checkout-timeout",
+        "title": "Checkout timeout retry for yemeksepeti",
+        "labels": [
+          "deprioritise"
+        ],
+        "cluster_id": null
+      },
+      {
+        "id": "promo-stacking",
+        "title": "Promo stacking cap for foodora",
+        "labels": [
+          "high-priority"
+        ],
+        "cluster_id": null
+      }
+    ],
+    "clusters": [
+      {
+        "id": "cluster-account-takeover-copy",
+        "survivor": "account-takeover-copy",
+        "members": [
+          "account-takeover-copy",
+          "account-takeover"
+        ]
+      }
+    ]
+  },
+  "inventory_writes": [
+    {
+      "op": "upsert_doc",
+      "id": "doc-promo-stacking"
+    }
+  ]
+}

@@ -15,7 +15,7 @@ def test_md_extracts_brands_markets_euro(tmp_path, monkeypatch):
     assert card["brands"] == ["foodpanda"]
     assert card["markets"] == ["HK", "SG"]
     assert card["euro_impact"]["value"] == 2_500_000
-    assert card["rate"]["value"] == 12
+    assert card["rate"]["value"] == 0.12
     assert card["journey"] in {"claims-cancel", "unknown"}
 
 

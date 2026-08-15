@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import difflib
 from pathlib import Path
 
-from trust_intake.match_inventory import THRESHOLD, score_overlap
+from trust_intake.match_inventory import THRESHOLD, TITLE_FLOOR, score_overlap, title_jaccard
 from trust_intake.triage_extract import extract_card
 from trust_intake.triage_read import read_document, read_sidecar
 
@@ -23,6 +22,9 @@ def _brand_jaccard(a: list[str] | None, b: list[str] | None) -> float:
 
 
 def score_pair(a: dict, b: dict) -> float:
+    title_score = title_jaccard(a.get("title") or "", b.get("title") or "")
+    if title_score < TITLE_FLOOR:
+        return 0.0
     if _known_journey(a.get("journey")) and _known_journey(b.get("journey")):
         return score_overlap(
             a["title"],
@@ -30,11 +32,7 @@ def score_pair(a: dict, b: dict) -> float:
             a.get("brands") or [],
             {"title": b["title"], "journey": b["journey"], "brands": b.get("brands") or []},
         )
-    title_a = (a.get("title") or "").lower()
-    title_b = (b.get("title") or "").lower()
-    return 0.5 * _brand_jaccard(a.get("brands"), b.get("brands")) + 0.5 * difflib.SequenceMatcher(
-        None, title_a, title_b
-    ).ratio()
+    return 0.5 * _brand_jaccard(a.get("brands"), b.get("brands")) + 0.5 * title_score
 
 
 def _metric_missing(metric: dict | None) -> bool:
@@ -145,10 +143,6 @@ def label_cards(cards: list[dict], inventory: dict, min_euro: float) -> list[dic
             if "extraction-gap" not in reasons:
                 reasons.append("extraction-gap")
 
-        if len(brands) >= 2 or len(markets) >= 2:
-            if "high-priority" not in labels:
-                labels.append("high-priority")
-
         deprior: list[str] = []
         euro = card.get("euro_impact") or {}
         if len(brands) == 1 and len(markets) == 1 and (_metric_missing(euro) or (euro.get("value") or 0) < min_euro):
@@ -165,8 +159,15 @@ def label_cards(cards: list[dict], inventory: dict, min_euro: float) -> list[dic
         for reason in deprior:
             if reason not in reasons:
                 reasons.append(reason)
-        if deprior and "deprioritise" not in labels:
-            labels.append("deprioritise")
+        if deprior:
+            if "deprioritise" not in labels:
+                labels.append("deprioritise")
+        else:
+            euro_val = euro.get("value")
+            material = not _metric_missing(euro) and euro_val is not None and float(euro_val) >= min_euro
+            if len(brands) >= 2 or len(markets) >= 2 or material:
+                if "high-priority" not in labels:
+                    labels.append("high-priority")
     return cards
 
 

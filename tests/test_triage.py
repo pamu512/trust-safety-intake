@@ -47,13 +47,20 @@ def test_thin_single_brand_market_low_euro():
     assert "thin" in out[0]["reasons"]
 
 
-def test_two_brands_no_numbers_high_priority_and_no_numbers():
+def test_two_brands_no_numbers_deprior_not_high_priority():
     cards = [_card("Cross-brand promo", ["foodora", "foodpanda"], ["SG"], "promo", id_="wide")]
     out = label_cards(cards, INV, 100_000)
-    assert "high-priority" in out[0]["labels"]
+    assert "high-priority" not in out[0]["labels"]
     assert "no-numbers" in out[0]["reasons"]
     assert "deprioritise" in out[0]["labels"]
     assert "thin" not in out[0]["reasons"]
+
+
+def test_material_single_market_is_high_priority():
+    cards = [_card("Germany refund SLA", ["foodora"], ["DE"], "claims-cancel", euro=2_000_000, id_="de")]
+    out = label_cards(cards, INV, 100_000)
+    assert "high-priority" in out[0]["labels"]
+    assert "deprioritise" not in out[0]["labels"]
 
 
 def test_already_ships_unknown_journey():
