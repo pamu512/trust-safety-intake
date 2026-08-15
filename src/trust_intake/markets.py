@@ -38,7 +38,8 @@ def resolve_markets(text: str, markets: dict[str, list[str]]) -> list[str]:
     found = set()
     for mid, aliases in markets.items():
         for alias in aliases:
-            if re.search(rf"\b{re.escape(alias)}\b", text, flags=re.I):
+            flags = 0 if len(alias) < 3 else re.I
+            if re.search(rf"\b{re.escape(alias)}\b", text, flags=flags):
                 found.add(mid)
                 break
     return sorted(found)

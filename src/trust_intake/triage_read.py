@@ -36,7 +36,13 @@ def read_document(path: Path) -> str:
     if suffix == ".docx":
         from docx import Document
 
-        return "\n".join(p.text for p in Document(path).paragraphs)
+        doc = Document(path)
+        parts = [p.text for p in doc.paragraphs]
+        for table in doc.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    parts.append(cell.text)
+        return "\n".join(parts)
     if suffix == ".pdf":
         from pypdf import PdfReader
 

@@ -18,3 +18,8 @@ def test_lint_duplicate_id():
 def test_singapore_alias():
     markets = {"SG": ["SG", "Singapore"], "DE": ["DE", "Germany"]}
     assert resolve_markets("Launch in Singapore and DE", markets) == ["DE", "SG"]
+
+
+def test_iso_ids_case_sensitive_not_english_words():
+    markets = load_markets(Path("inventory/markets.yaml"))
+    assert resolve_markets("claims at 12%. no extra. my team. Singapore", markets) == ["SG"]

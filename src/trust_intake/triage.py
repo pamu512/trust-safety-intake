@@ -3,7 +3,7 @@ from __future__ import annotations
 import difflib
 from pathlib import Path
 
-from trust_intake.match_inventory import THRESHOLD, match, score_overlap
+from trust_intake.match_inventory import THRESHOLD, score_overlap
 from trust_intake.triage_extract import extract_card
 from trust_intake.triage_read import read_document, read_sidecar
 
@@ -45,6 +45,43 @@ def _metric_missing(metric: dict | None) -> bool:
 
 def _euro_value(card: dict) -> float | None:
     return (card.get("euro_impact") or {}).get("value")
+
+
+def _format_euro(card: dict) -> str:
+    euro = card.get("euro_impact") or {}
+    value = euro.get("value")
+    source = euro.get("source") or "missing"
+    if value is None or source == "missing":
+        text = "€ missing"
+    else:
+        shown = int(value) if isinstance(value, (int, float)) and float(value) == int(value) else value
+        text = f"€{shown} ({source})"
+    if euro.get("estimate"):
+        text = f"{text} ESTIMATE"
+    return text
+
+
+def _inventory_overlaps(card: dict, inventory: dict) -> list[dict]:
+    overlaps = []
+    for kind, rows in (("control", inventory.get("controls") or []), ("doc", inventory.get("docs") or [])):
+        for item in rows:
+            item_card = {
+                "title": item.get("title") or item.get("name") or "",
+                "journey": item.get("journey"),
+                "brands": item.get("brands") or [],
+            }
+            score = score_pair(card, item_card)
+            if score >= THRESHOLD:
+                overlaps.append(
+                    {
+                        "id": item.get("id"),
+                        "kind": kind,
+                        "title": item_card["title"],
+                        "score": round(score, 4),
+                    }
+                )
+    overlaps.sort(key=lambda o: o["score"], reverse=True)
+    return overlaps
 
 
 def _survivor(cards: list[dict]) -> dict:
@@ -99,11 +136,8 @@ def label_cards(cards: list[dict], inventory: dict, min_euro: float) -> list[dic
         reasons = card.setdefault("reasons", [])
         brands = card.get("brands") or []
         markets = card.get("markets") or []
-        scored = match(
-            {"title": card["title"], "journey": card.get("journey"), "brands": brands},
-            inventory,
-        )
-        card["inventory_overlaps"] = scored["overlaps"]
+        scored_overlaps = _inventory_overlaps(card, inventory)
+        card["inventory_overlaps"] = scored_overlaps
 
         if not brands and not markets:
             if "extraction-gap" not in labels:
@@ -119,7 +153,7 @@ def label_cards(cards: list[dict], inventory: dict, min_euro: float) -> list[dic
         euro = card.get("euro_impact") or {}
         if len(brands) == 1 and len(markets) == 1 and (_metric_missing(euro) or (euro.get("value") or 0) < min_euro):
             deprior.append("thin")
-        if scored["overlaps"]:
+        if scored_overlaps:
             deprior.append("already-ships")
         if (
             _metric_missing(card.get("euro_impact"))
@@ -180,16 +214,19 @@ def render_triage_md(payload: dict) -> str:
     else:
         for card in high:
             lines.append(
-                f"- {card['id']}: {card.get('title')} brands={card.get('brands')} markets={card.get('markets')}"
+                f"- {card['id']}: {card.get('title')} brands={card.get('brands')} markets={card.get('markets')} {_format_euro(card)}"
             )
     lines += ["", "## Unify", ""]
     if not clusters:
         lines.append("(none)")
     else:
+        by_id = {c["id"]: c for c in cards}
         for cluster in clusters:
             lines.append(f"### {cluster['id']}")
-            lines.append(f"- members: {', '.join(cluster['members'])}")
-            lines.append(f"- survivor: {cluster['survivor']}")
+            member_bits = [f"{mid} {_format_euro(by_id.get(mid, {}))}" for mid in cluster["members"]]
+            lines.append(f"- members: {', '.join(member_bits)}")
+            survivor = cluster["survivor"]
+            lines.append(f"- survivor: {survivor} {_format_euro(by_id.get(survivor, {}))}")
             lines.append(f"- markets: {', '.join(cluster.get('markets') or [])}")
             for pair in cluster.get("pairwise") or []:
                 lines.append(f"- score {pair['a']}–{pair['b']}: {pair['score']}")
@@ -210,7 +247,7 @@ def render_triage_md(payload: dict) -> str:
                 continue
             lines.append(f"### {reason}")
             for card in rows:
-                lines.append(f"- {card['id']}: {card.get('title')}")
+                lines.append(f"- {card['id']}: {card.get('title')} {_format_euro(card)}")
             lines.append("")
     lines += ["## Extraction gaps", ""]
     gaps = [c for c in cards if "extraction-gap" in (c.get("labels") or [])]
@@ -258,6 +295,9 @@ def run_triage(folder: Path, inventory: dict, markets: dict, min_euro: float) ->
         except (OSError, ValueError) as exc:
             payload["warnings"].append(f"sidecar: {path.name}: {exc}")
             sidecar = {}
+        for key in ("brands", "markets"):
+            if key in sidecar and not isinstance(sidecar[key], (list, str)):
+                payload["warnings"].append(f"sidecar: {path.name}: {key} must be a list or string")
         cards.append(extract_card(path, text, sidecar, markets))
     if not cards:
         return 1, payload

@@ -15,6 +15,7 @@ def test_md_extracts_brands_markets_euro(tmp_path, monkeypatch):
     assert card["brands"] == ["foodpanda"]
     assert card["markets"] == ["HK", "SG"]
     assert card["euro_impact"]["value"] == 2_500_000
+    assert card["rate"]["value"] == 12
     assert card["journey"] in {"claims-cancel", "unknown"}
 
 
@@ -58,6 +59,55 @@ def test_docx_extracts_brand_and_euro(tmp_path):
     assert card["brands"] == ["foodpanda"]
     assert card["markets"] == ["SG"]
     assert card["euro_impact"]["value"] == 1_000_000
+
+
+def test_estimate_line_sets_flag():
+    card = extract_card(Path("x.md"), "# X\nfoodora\n~ €2.5M estimate\n", {}, {})
+    assert card["euro_impact"]["value"] == 2_500_000
+    assert card["euro_impact"]["source"] == "extract"
+    assert card["euro_impact"]["estimate"] is True
+
+
+def test_bare_account_not_a_journey():
+    card = extract_card(Path("x.md"), "# X\nCreate an account for the claimant.\n", {}, {})
+    assert card["journey"] == "unknown"
+
+
+def test_journey_label_sets_account():
+    card = extract_card(Path("x.md"), "# X\nJourney: account\n", {}, {})
+    assert card["journey"] == "account"
+
+
+def test_sidecar_string_brands_and_markets_wrapped():
+    card = extract_card(
+        Path("x.md"),
+        "# X\nfoodora\n",
+        {"brands": "foodpanda", "markets": "SG"},
+        {},
+    )
+    assert card["brands"] == ["foodpanda"]
+    assert card["markets"] == ["SG"]
+
+
+def test_sidecar_bad_types_no_traceback():
+    card = extract_card(Path("x.md"), "# X\nfoodora Singapore\n", {"brands": 1, "markets": 2}, {"SG": ["SG", "Singapore"]})
+    assert card["brands"] == ["foodora"]
+    assert card["markets"] == ["SG"]
+
+
+def test_docx_tables_included(tmp_path):
+    from docx import Document
+
+    path = tmp_path / "table.docx"
+    doc = Document()
+    table = doc.add_table(rows=1, cols=1)
+    table.cell(0, 0).text = "foodora Singapore. Exposure €500k."
+    doc.save(path)
+    text = read_document(path)
+    card = extract_card(path, text, {}, {"SG": ["SG", "Singapore"]})
+    assert card["brands"] == ["foodora"]
+    assert card["markets"] == ["SG"]
+    assert card["euro_impact"]["value"] == 500_000
 
 
 def test_sidecar_path_is_stem_meta_json(tmp_path):

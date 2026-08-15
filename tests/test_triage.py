@@ -56,6 +56,52 @@ def test_two_brands_no_numbers_high_priority_and_no_numbers():
     assert "thin" not in out[0]["reasons"]
 
 
+def test_already_ships_unknown_journey():
+    cards = [
+        _card(
+            "Repeat claimant static control",
+            ["foodpanda"],
+            ["SG"],
+            "unknown",
+            euro=2_500_000,
+            id_="rep",
+        )
+    ]
+    out = label_cards(cards, INV, 100_000)
+    assert "already-ships" in out[0]["reasons"]
+    assert out[0]["inventory_overlaps"]
+
+
+def test_memo_euros_and_estimate():
+    cards = [
+        _card("Wide pain", ["foodora", "foodpanda"], ["SG", "HK"], "promo", euro=2_500_000, id_="wide"),
+        _card("Thin copy", ["foodora"], ["SG"], "promo", id_="thin"),
+    ]
+    cards[0]["euro_impact"]["estimate"] = True
+    cards[0]["labels"] = ["high-priority", "unify"]
+    cards[0]["cluster_id"] = "cluster-wide"
+    cards[1]["labels"] = ["deprioritise", "unify"]
+    cards[1]["reasons"] = ["thin"]
+    cards[1]["cluster_id"] = "cluster-wide"
+    md = render_triage_md(
+        {
+            "cards": cards,
+            "clusters": [
+                {
+                    "id": "cluster-wide",
+                    "members": ["wide", "thin"],
+                    "survivor": "wide",
+                    "pairwise": [{"a": "wide", "b": "thin", "score": 0.8}],
+                    "markets": ["HK", "SG"],
+                }
+            ],
+            "warnings": [],
+        }
+    )
+    assert "€2500000 (extract) ESTIMATE" in md
+    assert "€ missing" in md
+
+
 def test_already_ships_seed_control():
     cards = [
         _card(
@@ -89,6 +135,15 @@ def test_xlsx_warning_not_crash(tmp_path):
     md = render_triage_md(payload)
     for heading in ("High priority", "Unify", "Deprioritise", "Extraction gaps", "Warnings"):
         assert heading in md
+
+
+def test_bad_sidecar_warns_no_crash(tmp_path):
+    (tmp_path / "ok.md").write_text("# A\nfoodora Singapore\n€2M\n", encoding="utf-8")
+    (tmp_path / "ok.meta.json").write_text('{"brands": 1, "markets": 2}', encoding="utf-8")
+    code, payload = run_triage(tmp_path, INV, MARKETS, 100000)
+    assert code == 0
+    assert payload["cards"]
+    assert any("sidecar" in w for w in payload["warnings"])
 
 
 def test_extraction_gap_not_deprioritised_solely():

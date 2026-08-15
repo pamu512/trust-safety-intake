@@ -219,7 +219,11 @@ def _cmd_triage(args: argparse.Namespace) -> int:
         _emit([_fail("missing_file", str(folder), f"missing {folder}")])
         return 2
     inventory = load_inventory(Path(args.inventory))
-    markets = load_markets(Path(args.markets))
+    try:
+        markets = load_markets(Path(args.markets))
+    except ValueError as exc:
+        _emit([_fail("unreadable_file", str(args.markets), str(exc))])
+        return 2
     code, payload = run_triage(folder, inventory, markets, args.min_euro)
     (folder / "triage.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

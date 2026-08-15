@@ -73,6 +73,13 @@ def test_inventory_lint_missing_markets_skips(tmp_path: Path):
     )
 
 
+def test_triage_bad_markets_exits_2(tmp_path: Path):
+    markets = tmp_path / "markets.yaml"
+    markets.write_text("markets:\n  - {id: SG}\n  - {id: SG}\n", encoding="utf-8")
+    (tmp_path / "a.md").write_text("# A\nfoodora\n", encoding="utf-8")
+    assert main(["triage", str(tmp_path), "--markets", str(markets)]) == 2
+
+
 def test_triage_empty_folder_exits_1(tmp_path: Path):
     assert main(["triage", str(tmp_path)]) == 1
 
