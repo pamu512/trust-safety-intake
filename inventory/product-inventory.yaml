@@ -1,0 +1,49 @@
+brands:
+  - foodora
+  - foodpanda
+  - yemeksepeti
+journeys:
+  - account
+  - promo
+  - checkout
+  - claims-cancel
+  - payout
+  - cross-journey
+stack:
+  - id: rules
+    name: Rules engine
+    layer: decisioning
+    notes: Parameterize before new PRDs
+  - id: ml-score
+    name: ML risk score
+    layer: decisioning
+    notes: Maturity to map
+  - id: sql-wh
+    name: SQL warehouse
+    layer: data
+    notes: ""
+  - id: looker
+    name: Looker
+    layer: reporting
+    notes: ""
+  - id: manual-inv
+    name: Manual investigations
+    layer: ops
+    notes: ""
+controls:
+  - id: ctl-refund-static
+    name: Repeat claimant rule
+    type: rule
+    journey: claims-cancel
+    brands: [foodpanda]
+    status: live
+    owner: ops
+    related_docs: [doc-ex-1]
+docs:
+  - id: doc-ex-1
+    type: brd
+    title: Repeat claimant static rule
+    status: shipped
+    journey: claims-cancel
+    brands: [foodpanda]
+    link: ""
