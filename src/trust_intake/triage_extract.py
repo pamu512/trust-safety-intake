@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from trust_intake.answers import BRANDS, JOURNEYS
+from trust_intake.answers import BRANDS, JOURNEYS, expand_brands
 from trust_intake.ledger import scan_quantities
 from trust_intake.markets import resolve_markets
 
@@ -18,7 +18,7 @@ def extract_card(path: Path, text: str, sidecar: dict, markets: dict) -> dict:
         "id": path.stem,
         "path": str(path),
         "title": _title(path, text),
-        "brands": sidecar["brands"] if "brands" in sidecar else _brands(text),
+        "brands": expand_brands(sidecar["brands"]) if "brands" in sidecar else _brands(text),
         "markets": sidecar["markets"] if "markets" in sidecar else resolve_markets(text, markets),
         "journey": sidecar["journey"] if "journey" in sidecar else _journey(text),
         "euro_impact": _metric(sidecar, "euro_impact", euro, "EUR"),

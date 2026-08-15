@@ -29,6 +29,11 @@ def test_sidecar_overrides_brands():
     assert card["brands"] == ["foodpanda"]
 
 
+def test_sidecar_brands_filtered_through_brands():
+    card = extract_card(Path("x.md"), "# X\nfoodora\n", {"brands": ["acme", "foodpanda"]}, {})
+    assert card["brands"] == ["foodpanda"]
+
+
 def test_html_extracts_title_and_brand(tmp_path):
     path = tmp_path / "note.html"
     path.write_text("<h1>Title</h1><p>foodora Germany</p>", encoding="utf-8")
