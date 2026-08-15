@@ -1,0 +1,58 @@
+{
+  "run_id": "golden-refund-abuse",
+  "title": "Refund holdout for repeat claimants",
+  "decision": "ship",
+  "success": {
+    "metric": "refund-abuse-rate",
+    "direction": "down",
+    "target": "Finance-signed reduction"
+  },
+  "approvers": ["finance"],
+  "brands": ["foodpanda"],
+  "journey": "claims-cancel",
+  "already_ships": "Brand X logged 10000 claims at a 12% refund-abuse rate, about €2.5M annual loss on the claims-cancel journey.",
+  "doc_action": "amend",
+  "amend_target_id": "doc-ex-1",
+  "duplicate_override": null,
+  "elapsed_fraction": null,
+  "shares": {},
+  "doc_type": "brd",
+  "needed_metrics": {
+    "volume": {"value": 10000, "unit": "claims"},
+    "rate": {"value": 0.12, "unit": "%"},
+    "euro_impact": {"value": 2500000, "unit": "EUR"},
+    "trend": {"value": null, "unit": null},
+    "baseline": {"value": null, "unit": null},
+    "cx_fp_cost": {"value": null, "unit": null}
+  },
+  "numbers_from_author": [
+    {"name": "volume", "value": 10000, "unit": "claims", "source": "interview"},
+    {"name": "rate", "value": 0.12, "unit": "%", "source": "interview"},
+    {"name": "euro_impact", "value": 2500000, "unit": "EUR", "source": "interview"}
+  ],
+  "options": [
+    {
+      "id": "do-nothing",
+      "title": "Keep the queue",
+      "summary": "Leave the existing refund queue and static rule unchanged for this quarter.",
+      "is_do_nothing": true
+    },
+    {
+      "id": "holdout",
+      "title": "Holdout + policy",
+      "summary": "Ship a holdout on refund policy changes and measure net margin before scaling.",
+      "is_do_nothing": false
+    }
+  ],
+  "favorite_option_id": "holdout",
+  "devils_advocate": {
+    "why_fails": "Holdout may starve a market of refunds and spike NPS complaints in week one.",
+    "who_loses": "Good customers who need a legitimate refund during the holdout window.",
+    "cannot_measure": "True fraudster displacement will not show in ninety days of one brand.",
+    "why_not_live_control": "The static repeat-claimant rule already covers the loudest pattern."
+  },
+  "recommendation": {
+    "option_id": "holdout",
+    "argument": "The locked outcome is a Finance-grade savings proof; only a holdout produces that proof."
+  }
+}
