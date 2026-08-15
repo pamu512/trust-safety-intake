@@ -41,6 +41,60 @@ def test_inventory_lint_missing_exits_2(tmp_path: Path):
     assert main(["inventory-lint", "--inventory", str(tmp_path / "missing.yaml")]) == 2
 
 
+def test_inventory_lint_bad_markets_exits_1(tmp_path: Path):
+    markets = tmp_path / "markets.yaml"
+    markets.write_text("markets:\n  - {id: SG}\n  - {id: SG}\n", encoding="utf-8")
+    assert (
+        main(
+            [
+                "inventory-lint",
+                "--inventory",
+                str(INVENTORY),
+                "--markets",
+                str(markets),
+            ]
+        )
+        == 1
+    )
+
+
+def test_inventory_lint_missing_markets_skips(tmp_path: Path):
+    assert (
+        main(
+            [
+                "inventory-lint",
+                "--inventory",
+                str(INVENTORY),
+                "--markets",
+                str(tmp_path / "nope.yaml"),
+            ]
+        )
+        == 0
+    )
+
+
+def test_triage_empty_folder_exits_1(tmp_path: Path):
+    assert main(["triage", str(tmp_path)]) == 1
+
+
+def test_triage_missing_folder_exits_2(tmp_path: Path):
+    assert main(["triage", str(tmp_path / "nope")]) == 2
+
+
+def test_triage_scores_md(tmp_path: Path):
+    (tmp_path / "a.md").write_text(
+        "# Repeat claimant static control\nfoodpanda Singapore\n€2.5M\nclaims-cancel\n"
+    )
+    (tmp_path / "b.md").write_text(
+        "# Repeat claimant static rule\nfoodpanda Hong Kong\n€1M\nclaims-cancel\n"
+    )
+    assert main(["triage", str(tmp_path)]) == 0
+    assert (tmp_path / "triage.json").is_file()
+    assert (tmp_path / "triage.md").is_file()
+    md = (tmp_path / "triage.md").read_text()
+    assert "High priority" in md or "Unify" in md or "Deprioritise" in md
+
+
 def test_run_without_file_then_render_exits_0(tmp_path: Path, complete_answers):
     assert main(["init", "--title", "Holdout for refunds", "--runs-dir", str(tmp_path)]) == 0
     run_id = next(p.name for p in tmp_path.iterdir() if p.is_dir())

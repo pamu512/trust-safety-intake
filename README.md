@@ -47,3 +47,11 @@ trust-intake inventory-render
 `inventory/product-inventory.md` is generated. Do not edit it by hand.
 
 The agent still asks what already ships today. Inventory is not a substitute for the interview.
+
+## BRD triage
+
+A PM can drop a folder of submitted BRDs (markdown, Word, PDF, or HTML). `trust-intake triage` extracts brands, markets, and euros, then writes `triage.json` and a `triage.md` memo with unify / deprioritise / high-priority labels. `inventory-lint` also checks `inventory/markets.yaml` when that file exists.
+
+```
+trust-intake triage <folder> [--min-euro 100000] [--markets inventory/markets.yaml]
+```

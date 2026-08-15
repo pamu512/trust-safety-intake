@@ -1,6 +1,6 @@
 ---
 name: trust-intake
-description: Use when someone at Pandora Trust & Safety wants a BRD, PRD, business case, or case study; when an ask is unclear and an outcome must be locked first; when a request might duplicate an existing control or BRD; or when numbers or trends are missing and a CSV/XLSX or extrapolation is needed.
+description: Use when someone at Pandora Trust & Safety wants a BRD, PRD, business case, or case study; when an ask is unclear and an outcome must be locked first; when a request might duplicate an existing control or BRD; when numbers or trends are missing and a CSV/XLSX or extrapolation is needed; or when a PM wants to triage a folder of submitted BRDs.
 ---
 
 # Trust intake

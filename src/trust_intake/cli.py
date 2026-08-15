@@ -10,10 +10,12 @@ from trust_intake.extrapolate import extrapolate
 from trust_intake.inventory_lint import lint_inventory, load_inventory
 from trust_intake.inventory_render import render_inventory_md
 from trust_intake.ledger import build_ledger
+from trust_intake.markets import lint_markets, load_markets
 from trust_intake.match_inventory import match
 from trust_intake.parse_table import parse_table
 from trust_intake.render import is_approved, render_memo, render_to_run, write_approved
 from trust_intake.run_store import init_run, read_json, write_json
+from trust_intake.triage import render_triage_md, run_triage
 from trust_intake.validate_draft import validate_run
 
 
@@ -43,6 +45,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parent = argparse.ArgumentParser(add_help=False)
     parent.add_argument("--runs-dir", default="runs")
     parent.add_argument("--inventory", default="inventory/product-inventory.yaml")
+    parent.add_argument("--markets", default="inventory/markets.yaml")
     parent.add_argument("--templates", default="templates")
 
     parser = _Parser(prog="trust-intake")
@@ -62,6 +65,10 @@ def _build_parser() -> argparse.ArgumentParser:
     run_p = sub.add_parser("run", parents=[parent])
     run_p.add_argument("--run", required=True)
     run_p.add_argument("--file")
+
+    triage_p = sub.add_parser("triage", parents=[parent])
+    triage_p.add_argument("folder")
+    triage_p.add_argument("--min-euro", type=float, default=100000)
 
     sub.add_parser("inventory-lint", parents=[parent])
     sub.add_parser("inventory-render", parents=[parent])
@@ -192,10 +199,33 @@ def _cmd_inventory_lint(args: argparse.Namespace) -> int:
         _emit([_fail("unreadable_file", str(path), str(exc))])
         return 2
     failures = lint_inventory(data)
+    markets_path = Path(args.markets)
+    if markets_path.is_file():
+        try:
+            raw = load_inventory(markets_path)
+        except (OSError, ValueError) as exc:
+            _emit([_fail("unreadable_file", str(markets_path), str(exc))])
+            return 2
+        failures.extend(lint_markets(raw))
     if failures:
         _emit(failures)
         return 1
     return 0
+
+
+def _cmd_triage(args: argparse.Namespace) -> int:
+    folder = Path(args.folder)
+    if not folder.is_dir():
+        _emit([_fail("missing_file", str(folder), f"missing {folder}")])
+        return 2
+    inventory = load_inventory(Path(args.inventory))
+    markets = load_markets(Path(args.markets))
+    code, payload = run_triage(folder, inventory, markets, args.min_euro)
+    (folder / "triage.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    (folder / "triage.md").write_text(render_triage_md(payload), encoding="utf-8")
+    return code
 
 
 def _cmd_inventory_render(args: argparse.Namespace) -> int:
@@ -218,6 +248,7 @@ _COMMANDS = {
     "run": _cmd_run,
     "inventory-lint": _cmd_inventory_lint,
     "inventory-render": _cmd_inventory_render,
+    "triage": _cmd_triage,
 }
 
 
