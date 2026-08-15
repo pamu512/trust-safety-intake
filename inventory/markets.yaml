@@ -1,0 +1,33 @@
+markets:
+  - id: DE
+    aliases: [Germany, Deutschland]
+  - id: AT
+    aliases: [Austria, Österreich]
+  - id: NL
+    aliases: [Netherlands, Nederland]
+  - id: SE
+    aliases: [Sweden, Sverige]
+  - id: "NO"
+    aliases: [Norway, Norge]
+  - id: FI
+    aliases: [Finland, Suomi]
+  - id: DK
+    aliases: [Denmark, Danmark]
+  - id: SG
+    aliases: [Singapore]
+  - id: HK
+    aliases: [Hong Kong]
+  - id: MY
+    aliases: [Malaysia]
+  - id: TH
+    aliases: [Thailand]
+  - id: TW
+    aliases: [Taiwan]
+  - id: PH
+    aliases: [Philippines]
+  - id: PK
+    aliases: [Pakistan]
+  - id: BD
+    aliases: [Bangladesh]
+  - id: TR
+    aliases: [Turkey, Türkiye]
