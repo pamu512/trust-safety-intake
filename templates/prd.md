@@ -39,7 +39,7 @@
 Amend target {{answers.amend_target_id}} is out of scope unless doc_action is amend.
 
 ## Acceptance criteria
-{{answers.success.metric}} {{answers.success.direction}} {{answers.success.target}}
+{{answers.success.metric}}
 Volume {{ledger.volume}}
 
 ## Non-goals

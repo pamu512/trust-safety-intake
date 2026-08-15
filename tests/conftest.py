@@ -9,7 +9,7 @@ def complete_answers() -> dict:
     a.update(
         {
             "decision": "ship",
-            "success": {"metric": "refund-abuse-rate", "direction": "down", "target": "0.4%"},
+            "success": {"metric": "refund-abuse-rate", "direction": "down", "target": "Finance-signed reduction"},
             "approvers": ["finance"],
             "brands": ["foodpanda"],
             "journey": "claims-cancel",

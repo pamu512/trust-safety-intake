@@ -33,5 +33,5 @@
 {{answers.recommendation.argument}}
 
 ## After
-{{answers.success.metric}} {{answers.success.direction}} {{answers.success.target}}
+{{answers.success.metric}}
 Volume {{ledger.volume}}
