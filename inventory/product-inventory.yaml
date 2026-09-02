@@ -1,3 +1,4 @@
+stub: example
 brands:
   - foodora
   - foodpanda
@@ -36,14 +37,14 @@ controls:
     type: rule
     journey: claims-cancel
     brands: [foodpanda]
-    status: live
+    status: example
     owner: ops
     related_docs: [doc-ex-1]
 docs:
   - id: doc-ex-1
     type: brd
     title: Repeat claimant static rule
-    status: shipped
+    status: example
     journey: claims-cancel
     brands: [foodpanda]
     link: ""

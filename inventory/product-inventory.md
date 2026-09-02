@@ -1,5 +1,7 @@
 # Product inventory
 
+> **Example stub — not a live catalog.** Foodora, Foodpanda, and Yemeksepeti here are demo brand codes. Rows below are fixtures, not production.
+
 Generated. Edit `product-inventory.yaml`.
 
 ## Stack
@@ -16,10 +18,10 @@ Generated. Edit `product-inventory.yaml`.
 
 | id | name | type | journey | brands | status | owner |
 | --- | --- | --- | --- | --- | --- | --- |
-| ctl-refund-static | Repeat claimant rule | rule | claims-cancel | foodpanda | live | ops |
+| ctl-refund-static | Repeat claimant rule | rule | claims-cancel | foodpanda | example | ops |
 
 ## Docs
 
 | id | type | title | status | journey | brands |
 | --- | --- | --- | --- | --- | --- |
-| doc-ex-1 | brd | Repeat claimant static rule | shipped | claims-cancel | foodpanda |
+| doc-ex-1 | brd | Repeat claimant static rule | example | claims-cancel | foodpanda |

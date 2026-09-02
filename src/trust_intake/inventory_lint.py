@@ -7,9 +7,9 @@ import yaml
 from trust_intake.answers import BRANDS, JOURNEYS
 
 CONTROL_TYPES = ("rule", "ml", "policy", "ops")
-CONTROL_STATUS = ("live", "pilot", "planned", "retired")
+CONTROL_STATUS = ("live", "pilot", "planned", "retired", "example")
 DOC_TYPES = ("brd", "prd", "business-case", "case-study", "ticket")
-DOC_STATUS = ("draft", "open", "approved", "shipped", "killed")
+DOC_STATUS = ("draft", "open", "approved", "shipped", "killed", "example")
 
 
 def load_inventory(path: Path) -> dict:
