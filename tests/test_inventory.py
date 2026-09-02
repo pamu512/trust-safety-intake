@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from trust_intake.inventory_lint import lint_inventory, load_inventory
+from trust_intake.inventory_lint import CONTROL_STATUS, DOC_STATUS, lint_inventory, load_inventory
 from trust_intake.inventory_render import render_inventory_md
 
 
@@ -64,6 +64,22 @@ def test_render_contains_tables():
     assert "| doc-ex-1 |" in md
 
 
+def test_live_token_stays_in_schema():
+    assert "live" in CONTROL_STATUS
+    assert "example" in CONTROL_STATUS
+    assert "shipped" in DOC_STATUS
+    assert "example" in DOC_STATUS
+
+
 def test_load_seed_file():
     data = load_inventory(Path("inventory/product-inventory.yaml"))
     assert lint_inventory(data) == []
+    ctl = next(c for c in data["controls"] if c["id"] == "ctl-refund-static")
+    assert ctl["status"] == "example"
+    assert ctl["status"] != "live"
+    doc = next(d for d in data["docs"] if d["id"] == "doc-ex-1")
+    assert doc["status"] == "example"
+    assert doc["status"] != "shipped"
+    md = render_inventory_md(data)
+    assert "Example stub — not a live catalog." in md
+    assert "foodpanda | example |" in md
