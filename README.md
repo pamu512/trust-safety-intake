@@ -1,6 +1,6 @@
 # Trust Safety Intake
 
-Trust & Safety feature intake facory  
+Trust & Safety feature intake factory  
 
 Two jobs:
 
